@@ -8,6 +8,7 @@ import cv2
 import colorama
 import cv2
 from pyzbar.pyzbar import decode
+import time
 
 
 dotenv.load_dotenv()
@@ -58,6 +59,7 @@ while camera:
         isbn = barcode.data.decode('utf-8')
         print(f"{colorama.Fore.MAGENTA}>>{colorama.Fore.GREEN} [{colorama.Fore.WHITE}+{colorama.Fore.GREEN}] Barcode: {isbn}{colorama.Fore.RESET}")
         log_book(isbn, get_book_info(isbn))
+        time.sleep(0.5)
     
         
 
