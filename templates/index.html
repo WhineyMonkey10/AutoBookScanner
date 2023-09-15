@@ -1,34 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <title>Book List</title>
+    <title>Book Library</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Book List</h1>
+    <h1>Book Library</h1>
 
-    <div class="book-list">
-        {% for book in books %}
-            <div class="book-card" data-toggle="modal" data-target="#{{ book.id }}">
-                <img src="{{ book.thumbnail_url }}" alt="Book Thumbnail">
-                <p>{{ book.title }} by {{ book.author }}</p>
-            </div>
-            <div class="modal" id="{{ book.id }}">
-                <div class="modal-content">
-                    <span class="close-modal" data-dismiss="modal">&times;</span>
-                    <h2>{{ book.title }}</h2>
-                    <p>Author: {{ book.author }}</p>
-                    <p>Published Date: {{ book.published_date }}</p>
-                    <p>Rating: {{ book.rating }}</p>
-                    <p>ISBN: {{ book.isbn }}</p>
-                    <!-- Add other book information as needed -->
-                </div>
-            </div>
-        {% endfor %}
+    <form method="POST" action="/" id="search-form">
+        <input type="text" name="search_query" placeholder="Search by title or author">
+        <button type="submit">Search</button>
+    </form>
+    <div class="card-container">
+    {% for book in books %}
+    <div class="card" data-book-id="{{ book.ISBNid }}">
+        <h3>{{ book.volumeInfo_title }}</h3>
+        <p><span class="author">Author: {{ book.volumeInfo_authors_0 }}</span></p>
+        <p>Published: {{ book.volumeInfo_publishedDate }}</p>
+        <img src="{{ book.volumeInfo_imageLinks_thumbnail | default(url_for('static', filename='images/book-default.png')) }}" alt="Book Cover">
+    </div>
+    {% endfor %}
+    </div>
+    
+    
+    <div class="modal">
+        <div class="modal-content">
+            <h3>Edit Book</h3>
+                Hello
+        </div>
     </div>
 
-    <script src="{{ url_for('static', filename='index_javascript.js') }}"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
