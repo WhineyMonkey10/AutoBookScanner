@@ -9,15 +9,16 @@ from pyzbar.pyzbar import decode
 import time
 import click
 import colorama
-import pygame
 
-# Initialize colorama
+
 colorama.init(autoreset=True)
 
 dotenv.load_dotenv()
 api_key = os.getenv('GOOGLE_BOOKS_API_KEY')
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
-# Authenticate to Firebase
+import pygame 
+
 cred = credentials.Certificate("serviceAccount.json")
 
 app = firebase_admin.initialize_app(cred)
@@ -79,13 +80,14 @@ def loading_animation():
             yield f"{colorama.Fore.GREEN}{'.' * i}{' ' * (3 - i)}{colorama.Style.RESET_ALL}"
             time.sleep(0.5)
 
-def test_google_books_api(isbn):
+def test_google_books_api(isbn, wait):
     click.echo("Testing Google Books API...")
-    loader = loading_animation()
-    for _ in range(5):
-        click.echo(next(loader), nl=False)
-        time.sleep(0.2)
-    click.echo()
+    if wait:
+        loader = loading_animation()
+        for _ in range(5):
+            click.echo(next(loader), nl=False)
+            time.sleep(0.2)
+        click.echo()
 
     book_info = get_book_info(isbn)
     if book_info is not None:
@@ -93,13 +95,14 @@ def test_google_books_api(isbn):
     else:
         click.echo(f"{colorama.Fore.RED}Google Books API test failed!{colorama.Fore.RESET}")
 
-def test_database_connection():
+def test_database_connection(wait):
     click.echo("Testing database connection...")
-    loader = loading_animation()
-    for _ in range(5):
-        click.echo(next(loader), nl=False)
-        time.sleep(0.2)
-    click.echo()
+    if wait:
+        loader = loading_animation()
+        for _ in range(5):
+            click.echo(next(loader), nl=False)
+            time.sleep(0.2)
+        click.echo()
 
     try:
         db.collection('test').document('test').set({'test': 'test'})
@@ -110,11 +113,12 @@ def test_database_connection():
 @click.command()
 @click.option('--test-google-api', is_flag=True, help='Run the Google Books API test')
 @click.option('--test-database', is_flag=True, help='Run the database connection test')
-def main(test_google_api, test_database):
+@click.option('--no-wait', is_flag=True, help='Do not wait the loading animation')
+def main(test_google_api, test_database, no_wait):
     if test_google_api:
-        test_google_books_api('9780451524935')  # Replace with a valid ISBN for testing
+        test_google_books_api('9780451524935', wait=not no_wait)
     if test_database:
-        test_database_connection()
+        test_database_connection(wait=not no_wait)
 
     cap = cv2.VideoCapture(0)
     cap.set(3, 1280)
