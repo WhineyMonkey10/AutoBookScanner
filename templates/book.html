@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Book - {{ book.volumeInfo_title }}</title>
+</head>
+<body>
+    <h1>{{ book.volumeInfo_title }}</h1>
+    <div class="card-container">
+        <div class="info-card">
+            <img src="{{ book.volumeInfo_imageLinks_thumbnail | default(url_for('static', filename='images/book-default.png')) }}" alt="Book Cover">
+            <h3>{{ book.volumeInfo_title }}</h3>
+            <p><span class="author">Author: {{ book.volumeInfo_authors_0 }}</span></p>
+            <p>Published: {{ book.volumeInfo_publishedDate }}</p>
+            <p>ISBN: {{ book.ISBNid }}</p>
+            <p>Page Count: {{ book.volumeInfo_pageCount }}</p>
+            <p>Categories: {{ book.volumeInfo_categories_0 }}</p>
+            <p>Language: {{ book.volumeInfo_language }}</p>
+            <p>Rating: {{ book.volumeInfo_averageRating }}</p>
+            <p>Rating Count: {{ book.volumeInfo_ratingsCount }}</p>
+            <p>Price: {{ book.saleInfo_listPrice_amount }}</p>
+            <p>Description: {{ book.volumeInfo_description }}</p>
+            <p>Preview: <a href="{{ book.volumeInfo_previewLink }}">{{ book.volumeInfo_previewLink }}</a></p>
+            <p>Buy link: <a href="{{ book.saleInfo_buyLink }}">{{ book.saleInfo_buyLink }}</a></p>
+            <p>Is EBook: {{ book.saleInfo_isEbook }}</p>
+            <p>Web Reader Link: <a href="{{ book.accessInfo_webReaderLink }}">{{ book.accessInfo_webReaderLink }}</a></p>
+        </div>
+    </div>
+</body>
+</html>

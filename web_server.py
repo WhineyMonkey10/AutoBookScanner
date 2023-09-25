@@ -16,12 +16,15 @@ db = firestore.client()
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    books = get_all_books()  # Fetch all books
     if request.method == 'POST':
         search_query = request.form['search_query']
-        books = search_books(search_query)
-    else:
-        books = get_all_books(skip=0, limit=20)
-            
+        # Filter books on the client side based on the search query
+        if search_query:
+            search_query_lowercase = search_query.lower()
+            books = [book for book in books if
+                     search_query_lowercase in book['title_lowercase'].lower() or
+                     search_query_lowercase in book['author'].lower()]
 
     return render_template('index.html', books=books)
 
@@ -85,6 +88,12 @@ def get_all_books(skip=0, limit=None):
     
     return books
 
+@app.route('/book/<ISBNid>')
+def book(ISBNid):
+    book_ref = db.collection('books').document(ISBNid)
+    book = book_ref.get()
+    book_data = book.to_dict()
+    return render_template('book.html', book=book_data)
 
 if __name__ == '__main__':
     app.run(debug=True)
