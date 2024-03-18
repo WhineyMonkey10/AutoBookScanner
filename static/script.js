@@ -1,3 +1,5 @@
+var initialBooks = []; // Store the initial database in a JavaScript variable
+
 // Function to filter and display cards based on the search query
 function filterCards(searchQuery) {
   var cardContainer = document.querySelector('.card-container');
@@ -24,6 +26,16 @@ searchInput.addEventListener('input', function () {
 
 // Function to handle page load and initial setup
 function handlePageLoad() {
+  // Fetch the initial books data and store it in the 'initialBooks' variable
+  fetch('/load_initial_books')
+  .then(response => response.json())
+  .then(data => {
+    initialBooks = data;
+    console.log('Initial books loaded:', initialBooks);
+    filterCards(''); // Initially, show all books
+  })
+  .catch(error => console.error('Error loading initial books:', error));
+
   // Add event listener to the search input field
   searchInput.addEventListener('input', function () {
     var searchQuery = searchInput.value.trim();

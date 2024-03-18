@@ -14,7 +14,7 @@ import sys
 import InquirerPy
 from InquirerPy import inquirer
 from InquirerPy.validator import NumberValidator, PathValidator, ValidationError, Validator
-from InquirerPy.prompts import confirm, expand, input, list, rawlist
+#from InquirerPy.prompts import confirm, expand, input, list, rawlist
 from InquirerPy.separator import Separator
 from InquirerPy.utils import color_print
 from InquirerPy import inquirer, prompt
@@ -22,13 +22,13 @@ import animation
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
 from InquirerPy.separator import Separator
-from InquirerPy.prompts import confirm, expand, input, list, rawlist
+#from InquirerPy.prompts import confirm, expand, input, list, rawlist
 from InquirerPy.utils import color_print
 from InquirerPy import inquirer, prompt
 from InquirerPy.validator import NumberValidator, PathValidator, ValidationError, Validator
 from InquirerPy import inquirer
 from InquirerPy.base import BaseComplexPrompt
-from InquirerPy.base.list import List
+#from InquirerPy.base.list import List
 from customtkinter import *
 
 
@@ -39,19 +39,17 @@ dotenv.load_dotenv()
 api_key = os.getenv('GOOGLE_BOOKS_API_KEY')
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 warnings.filterwarnings("ignore", category=UserWarning, module="pyzbar.decoder.pdf417")
-CTk = CTk()
-
-import pygame 
 
 cred = credentials.Certificate("serviceAccount.json")
 
 app = firebase_admin.initialize_app(cred)
 db = firestore.client()
 
+import pygame
 pygame.init()
 
 pygame.mixer.init()
-success_sound = pygame.mixer.Sound("Success.mp3")  
+success_sound = pygame.mixer.Sound("Success.mp3")
 error_sound = pygame.mixer.Sound("Error.mp3")
 notfound_sound = pygame.mixer.Sound("NotFound.mp3")
 
@@ -62,7 +60,6 @@ def long_loading_animation():
         yield '-'
         yield '\\'
 
-
 def get_book_info(isbn):
     url = f'https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}&key={api_key}'
     response = requests.get(url)
@@ -71,14 +68,14 @@ def get_book_info(isbn):
         return data
     else:
         return None
-    
+
 def system_message(message):
     click.echo(f"{colorama.Fore.MAGENTA}>>{colorama.Fore.GREEN} [{colorama.Fore.LIGHTYELLOW_EX}SYSTEM{colorama.Fore.GREEN}] {message}{colorama.Fore.RESET}")
 
 def log_book(isbn, bookinfo, no_sound):
     if isbn is None or bookinfo is None or bookinfo.get('totalItems', 0) == 0:
         click.echo(f"{colorama.Fore.MAGENTA}>>{colorama.Fore.RED} [{colorama.Fore.WHITE}-{colorama.Fore.RED}] Error: Book not found{colorama.Fore.RESET}")
-        if no_sound == False:
+        if not no_sound:
             notfound_sound.play()
         return
     book_ref = db.collection('books').document(isbn)
@@ -86,12 +83,13 @@ def log_book(isbn, bookinfo, no_sound):
 
     if book_snapshot.exists:
         click.echo(f"{colorama.Fore.MAGENTA}>>{colorama.Fore.RED} [{colorama.Fore.WHITE}-{colorama.Fore.RED}] Error: Book already registered{colorama.Fore.RESET}")
-        if no_sound == False:
+        if not no_sound:
             error_sound.play()
         return
     formatted_data = bookinfo
-    if no_sound == False:
+    if not no_sound:
         success_sound.play()
+
     def flatten_dict(d, parent_key='', sep='_'):
         items = {}
         for k, v in d.items():
@@ -113,6 +111,7 @@ def log_book(isbn, bookinfo, no_sound):
     flattened_data = {key.replace('items_', '').replace('0_', ''): value for key, value in flattened_data.items()}
     book_ref.set(flattened_data)
     click.echo(f"{colorama.Fore.MAGENTA}>>{colorama.Fore.GREEN} [{colorama.Fore.WHITE}+{colorama.Fore.GREEN}] Book registered: {isbn}{colorama.Fore.RESET}")
+
 def loading_animation():
     while True:
         for i in range(4):
@@ -149,6 +148,7 @@ def test_database_connection(wait):
     except Exception as e:
         system_message("Database connection test failed. Your credentials may be invalid.")
 
+
 @click.command()
 @click.option('--test-google-api', is_flag=True, help=f'{colorama.Fore.MAGENTA}Run the Google Books API test{colorama.Fore.RESET}')
 @click.option('--test-database', is_flag=True, help=f'{colorama.Fore.MAGENTA}Run the database connection test{colorama.Fore.RESET}')
@@ -176,6 +176,7 @@ def main(test_google_api, test_database, no_wait, book_isbn, print_book_list, ti
         test_google_books_api('9780451524935', wait=not no_wait)
     if test_database:
         test_database_connection(wait=not no_wait)
+
     if manual:
         ISBN = input(f"{colorama.Fore.MAGENTA}>>{colorama.Fore.GREEN} [{colorama.Fore.WHITE}+{colorama.Fore.GREEN}] ISBN: {colorama.Fore.RESET}")
         if ISBN is None or get_book_info(ISBN) is None or log_book(ISBN, get_book_info(ISBN), no_sound)["totalItems"] == 0:
@@ -258,12 +259,13 @@ def main(test_google_api, test_database, no_wait, book_isbn, print_book_list, ti
                     elif isinstance(v, list):
                         for i, item in enumerate(v):
                             if isinstance(item, dict):
-                                items.update(flatten_dict(item, new_key, sep=sep))
+                                items.update(flatten_dict(item, f"{new_key}{sep}{i}", sep=sep))
                             else:
-                                items[f"{new_key}_{i}"] = item
+                                items[f"{new_key}{sep}{i}"] = item
                     else:
                         items[new_key] = v
                 return items
+
 
             flattened_data = flatten_dict(formatted_data)
             flattened_data = {key.replace('items_', '').replace('0_', ''): value for key, value in flattened_data.items()}
@@ -291,17 +293,23 @@ def main(test_google_api, test_database, no_wait, book_isbn, print_book_list, ti
     camera = True
     while camera:
         success, img = cap.read()
-        for barcode in decode(img):
-            isbn = barcode.data.decode('utf-8')
-            click.echo(f"{colorama.Fore.MAGENTA}>>{colorama.Fore.GREEN} [{colorama.Fore.WHITE}+{colorama.Fore.GREEN}] Barcode: {isbn}{colorama.Fore.RESET}")
-            log_book(isbn, get_book_info(isbn), no_sound)
-            time.sleep(timeout)
+        if not success:
+            continue  # Skip frames with no data
+        
+        barcodes = decode(img)
+        if barcodes:
+            for barcode in barcodes:
+                isbn = barcode.data.decode('utf-8')
+                click.echo(f"{colorama.Fore.MAGENTA}>>{colorama.Fore.GREEN} [{colorama.Fore.WHITE}+{colorama.Fore.GREEN}] Barcode: {isbn}{colorama.Fore.RESET}")
+                log_book(isbn, get_book_info(isbn), no_sound)
+                time.sleep(timeout)
 
         cv2.imshow('Result', img)
         cv2.waitKey(1)
 
 if __name__ == '__main__':
     main()
+
 
 
 # TODOD: Fix the bug where already registered or newly registered books are not being deleted from the log file (process-log option)

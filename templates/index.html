@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Book Library</h1>
+    <h1>Book Library - {{ total_books }} total books</h1>
 
     <form method="POST" action="/" id="search-form">
         <input type="text" name="search_query" placeholder="Search by title or author">
@@ -13,7 +13,7 @@
     </form>
     <div class="card-container">
     {% for book in books %}
-    <div class="card" data-book-id="{{ book.ISBNid }}">
+    <div class="card" data-book-id="{{ book.volumeInfo_industryIdentifiers_identifier }}">
         <h3>{{ book.volumeInfo_title }}</h3>
         <p><span class="author">Author: {{ book.volumeInfo_authors_0 }}</span></p>
         <p>Published: {{ book.volumeInfo_publishedDate }}</p>

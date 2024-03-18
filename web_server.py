@@ -13,20 +13,26 @@ firebase_admin.initialize_app(cred)
 # Initialize Firestore
 db = firestore.client()
 
+# @app.route("/dropDB", methods=['GET'])
+# def dropDB():
+#     books_ref = db.collection('books')
+#     books = books_ref.stream()
+#     for book in books:
+#         book.reference.delete()
+#     return "Database dropped"
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    books = get_all_books()  # Fetch all books
     if request.method == 'POST':
         search_query = request.form['search_query']
-        # Filter books on the client side based on the search query
-        if search_query:
-            search_query_lowercase = search_query.lower()
-            books = [book for book in books if
-                     search_query_lowercase in book['title_lowercase'].lower() or
-                     search_query_lowercase in book['author'].lower()]
+        books = search_books(search_query)
+    else:
+        books = get_all_books_cursor()
+    
+    totalbooks = len(books)	
+        
 
-    return render_template('index.html', books=books)
+    return render_template('index.html', books=books, total_books=totalbooks)
 
 
 
@@ -45,7 +51,7 @@ def load_more_books():
     current_count = int(request.form['current_count'])
 
     # Fetch more books starting from the current count
-    books = get_all_books(skip=current_count, limit=20)
+    books = get_all_books_cursor(current_count)
 
     # Convert books to a list and serialize using json_util
     books_list = list(books)
@@ -71,22 +77,12 @@ def search_books(search_query):
     return books
 
 
-def get_all_books(skip=0, limit=None):
+def get_all_books_cursor():
     books_ref = db.collection('books')
-    books = []
+    books = books_ref.stream()
     
-    if limit:
-        query = books_ref.limit(limit).offset(skip)
-    else:
-        query = books_ref.offset(skip)
-    
-    for book in query.stream():
-        book_data = book.to_dict()
-        # Add the document ISBN, which is the document ID in Firestore, to the book data under the key 'ISBNid'
-        book_data['ISBNid'] = book.id
-        books.append(book_data)
-    
-    return books
+    books_list = [book.to_dict() for book in books]  # Convert DocumentSnapshot objects to dictionaries
+    return books_list
 
 @app.route('/book/<ISBNid>')
 def book(ISBNid):
@@ -95,5 +91,10 @@ def book(ISBNid):
     book_data = book.to_dict()
     return render_template('book.html', book=book_data)
 
+@app.route('/load_initial_books', methods=['GET'])
+def load_initial_books():
+    books = get_all_books_cursor()
+    return jsonify(books)  # jsonif
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=3000)

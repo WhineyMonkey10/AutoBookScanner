@@ -3,30 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='book.css') }}">
     <title>Book - {{ book.volumeInfo_title }}</title>
+    <!-- Consider adding FontAwesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>{{ book.volumeInfo_title }}</h1>
-    <div class="card-container">
-        <div class="info-card">
-            <img src="{{ book.volumeInfo_imageLinks_thumbnail | default(url_for('static', filename='images/book-default.png')) }}" alt="Book Cover">
-            <h3>{{ book.volumeInfo_title }}</h3>
-            <p><span class="author">Author: {{ book.volumeInfo_authors_0 }}</span></p>
-            <p>Published: {{ book.volumeInfo_publishedDate }}</p>
-            <p>ISBN: {{ book.ISBNid }}</p>
-            <p>Page Count: {{ book.volumeInfo_pageCount }}</p>
-            <p>Categories: {{ book.volumeInfo_categories_0 }}</p>
-            <p>Language: {{ book.volumeInfo_language }}</p>
-            <p>Rating: {{ book.volumeInfo_averageRating }}</p>
-            <p>Rating Count: {{ book.volumeInfo_ratingsCount }}</p>
-            <p>Price: {{ book.saleInfo_listPrice_amount }}</p>
-            <p>Description: {{ book.volumeInfo_description }}</p>
-            <p>Preview: <a href="{{ book.volumeInfo_previewLink }}">{{ book.volumeInfo_previewLink }}</a></p>
-            <p>Buy link: <a href="{{ book.saleInfo_buyLink }}">{{ book.saleInfo_buyLink }}</a></p>
-            <p>Is EBook: {{ book.saleInfo_isEbook }}</p>
-            <p>Web Reader Link: <a href="{{ book.accessInfo_webReaderLink }}">{{ book.accessInfo_webReaderLink }}</a></p>
-        </div>
-    </div>
+    <header>
+        <h1>{{ book.volumeInfo_title }}</h1>
+    </header>
+    <section class="card-container">
+        <article class="info-card">
+            <img src="{{ book.volumeInfo_imageLinks_thumbnail | default(url_for('static', filename='images/book-default.png')) }}" alt="Book Cover" class="book-cover">
+            <div class="book-meta">
+                <h2>{{ book.volumeInfo_title }}</h2>
+                <div class="book-detail"><span class="icon"><i class="fas fa-user"></i></span> Author: {{ book.volumeInfo_authors_0 }}</div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-calendar-alt"></i></span> Published: {{ book.volumeInfo_publishedDate }}</div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-barcode"></i></span> ISBN: {{ book.ISBNid }}</div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-file-alt"></i></span> Page Count: {{ book.volumeInfo_pageCount }}</div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-tags"></i></span> Categories: {{ book.volumeInfo_categories_0 }}</div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-language"></i></span> Language: {{ book.volumeInfo_language }}</div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-star"></i></span> Rating: {{ book.volumeInfo_averageRating }} / 5</div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-users"></i></span> Rating Count: {{ book.volumeInfo_ratingsCount }}</div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-dollar-sign"></i></span> Price: ${{ book.saleInfo_listPrice_amount }}</div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-book-open"></i></span> Description: {{ book.volumeInfo_description }}</div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-eye"></i></span> Preview: <a href="{{ book.volumeInfo_previewLink }}">View Preview</a></div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-shopping-cart"></i></span> Buy: <a href="{{ book.saleInfo_buyLink }}">Purchase</a></div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-tablet-alt"></i></span> Is EBook: {{ 'Yes' if book.saleInfo_isEBook else 'No' }}</div>
+                <div class="book-detail"><span class="icon"><i class="fas fa-desktop"></i></span> Web Reader: <a href="{{ book.accessInfo_webReaderLink }}">Read Online</a></div>
+            </div>
+        </article>
+    </section>
 </body>
 </html>
