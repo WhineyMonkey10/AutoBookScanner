@@ -26,8 +26,14 @@ def index():
     if request.method == 'POST':
         search_query = request.form['search_query']
         books = search_books(search_query)
+        # Append the document's name to the dictionary
+        for book in books:
+            book['idMAIN'] = book.id
+            
     else:
         books = get_all_books_cursor()
+        for book in books:
+            book['idMAIN'] = book['id']
     
     totalbooks = len(books)	
         
@@ -84,11 +90,14 @@ def get_all_books_cursor():
     books_list = [book.to_dict() for book in books]  # Convert DocumentSnapshot objects to dictionaries
     return books_list
 
-@app.route('/book/<ISBNid>')
-def book(ISBNid):
-    book_ref = db.collection('books').document(ISBNid)
-    book = book_ref.get()
-    book_data = book.to_dict()
+@app.route('/book/<id>')
+def book(id):
+    # Get the book who has a field called id with the value of id
+    book_ref = db.collection('books').where('id', '==', id).limit(1)
+    book = book_ref.stream()
+    book_data = [book.to_dict() for book in book][0]
+    
+    
     return render_template('book.html', book=book_data)
 
 @app.route('/load_initial_books', methods=['GET'])

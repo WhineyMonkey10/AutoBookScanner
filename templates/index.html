@@ -3,6 +3,7 @@
 <head>
     <title>Book Library</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
 </head>
 <body>
     <h1>Book Library - {{ total_books }} total books</h1>
@@ -13,10 +14,12 @@
     </form>
     <div class="card-container">
     {% for book in books %}
-    <div class="card" data-book-id="{{ book.volumeInfo_industryIdentifiers_identifier }}">
+    <!-- For the data-book-id field, get the document id-->
+    <div class="card" data-book-id="{{ book.idMAIN }}">
         <h3>{{ book.volumeInfo_title }}</h3>
         <p><span class="author">Author: {{ book.volumeInfo_authors_0 }}</span></p>
         <p>Published: {{ book.volumeInfo_publishedDate }}</p>
+        <!--The book's IBAN is the document's identifier-->
         <img src="{{ book.volumeInfo_imageLinks_thumbnail | default(url_for('static', filename='images/book-default.png')) }}" alt="Book Cover">
     </div>
     {% endfor %}
